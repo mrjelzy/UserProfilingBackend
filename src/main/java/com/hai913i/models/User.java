@@ -1,25 +1,30 @@
 package com.hai913i.models;
 
+import java.time.LocalDate;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
+@Entity
+@Table(name = "users")
 public class User {
 	@Id
 	@GeneratedValue
 	private long id;
 	private String name;
 	private String email;
-	private String birthday;
+	private LocalDate birthday;
 	@JsonIgnore
 	private String password;
 	
 	public User() {}
 	
-	public User(long id, String name, String email, String birthday, String password) {
+	public User(String name, String email, LocalDate birthday, String password) {
 		super();
-		this.id = id;
 		this.name = name;
 		this.email = email;
 		this.birthday = birthday;
@@ -28,10 +33,6 @@ public class User {
 
 	public long getId() {
 		return id;
-	}
-
-	public void setId(long id) {
-		this.id = id;
 	}
 
 	public String getName() {
@@ -50,11 +51,11 @@ public class User {
 		this.email = email;
 	}
 
-	public String getBirthday() {
+	public LocalDate getBirthday() {
 		return birthday;
 	}
 
-	public void setBirthday(String birthday) {
+	public void setBirthday(LocalDate birthday) {
 		this.birthday = birthday;
 	}
 
