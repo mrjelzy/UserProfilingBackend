@@ -1,5 +1,7 @@
 package com.hai913i;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -14,6 +16,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import com.hai913i.logs.UserProfileBuilder;
 import com.hai913i.models.Product;
 import com.hai913i.models.User;
 import com.hai913i.repositories.ProductRepository;
@@ -41,12 +44,18 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
     @Override
     public void run(String... args) throws Exception {
     	scanner = new Scanner(System.in);
+    	
+    	clearJsonFile("logs/user-trace.json");
 
         // Initialisation des données
         initData();
 
         // Logique CLI
         startCli();
+        
+        UserProfileBuilder.profileBuilder();
+        
+        System.exit(0);
     }
 
     private void initData() {
@@ -120,7 +129,6 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
         } while (!choice.equals("x"));
         
         scanner.close();
-        System.exit(0);
     }
     
     private void manipulerProduit(String nameActualUser)
@@ -309,7 +317,7 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
 	        productRepository.save(newProduct);
 	        
 	        // LOGS
-	        logger.trace(actualUserId + ":write:" + null + ":Nouveau produit ajouté par l'utilisateur");
+	        logger.trace(actualUserId + ":write:" + "" + ":Nouveau produit ajouté par l'utilisateur");
 
 	        // Imprimez un message de confirmation
 	        System.out.println("Nouveau produit ajouté : " + newProduct.toString());
@@ -385,5 +393,13 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
 	        System.out.println(e.getMessage());
 	    }
 	}
+	
+	public static void clearJsonFile(String filePath) {
+        try (FileWriter fileWriter = new FileWriter(filePath, false)) {
+            fileWriter.write("");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 }

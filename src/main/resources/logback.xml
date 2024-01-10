@@ -2,7 +2,7 @@
 <configuration>
     <!-- Appender pour le fichier de log -->
     <appender name="JSON_FILE" class="ch.qos.logback.core.FileAppender">
-        <file>logs/user-trace.log</file>
+        <file>logs/user-trace.json</file>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
     </appender>
 
