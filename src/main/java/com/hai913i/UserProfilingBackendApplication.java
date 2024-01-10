@@ -7,6 +7,8 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Scanner;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -27,6 +29,10 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
     private UserRepository userRepository;
     
     private Scanner scanner;
+    
+    Logger logger = LoggerFactory.getLogger(UserProfilingBackendApplication.class);
+    
+    Long actualUserId = null;
 
     public static void main(String[] args) {
         SpringApplication.run(UserProfilingBackendApplication.class, args);
@@ -44,6 +50,8 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
     }
 
     private void initData() {
+    	System.out.println("");
+    	
         // Créez une nouvelle instance de Product
         Product newProduct = new Product("Chocolat", 3.50, LocalDate.of(2023, 12, 31));
         User newUser = new User("Pepe", "cacamail", LocalDate.of(2000, 12, 31), "caca");
@@ -150,6 +158,9 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
     	        
     	        if (p != null)
     	        {
+    	        	// LOGS
+    	            logger.trace("L'utilisateur " + actualUserId + " a cherché le produit " + myId);
+    	            
     	        	// Affichez les détails du produit si trouvé
     		        System.out.println("Détails du produit : " + p.toString());
     	        }
@@ -249,6 +260,9 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
 
         // Sauvegardez le nouvel utilisateur dans la base de données.
         userRepository.save(newUser);
+        
+        // LOGS
+        logger.trace("Nouvel utilisateur créé : " + newUser.getId());
 
         // Imprimez un message de confirmation.
         System.out.println("Nouvel utilisateur créé avec succès : " + newUser.toString());
@@ -257,8 +271,12 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
 
 	public String connectUser(String email, String password) {
 	    Optional<User> user = userRepository.findByEmailAndPassword(email, password);
-	    if(user.isPresent()) {
-	        // L'utilisateur existe
+	    if(user.isPresent())
+	    {
+	    	actualUserId = user.get().getId();
+	    	// LOGS
+	    	logger.trace("User " + user.get().getId() + " connecté");
+	    	
 	        System.out.println("Connexion réussie pour : " + user.get().getName());
 	        return user.get().getName();
 	    } else {
@@ -289,6 +307,9 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
 
 	        // Sauvegardez le nouveau produit dans la base de données
 	        productRepository.save(newProduct);
+	        
+	        // LOGS
+	        logger.trace("Nouveau produit ajouté par l'utilisateur : " + actualUserId);
 
 	        // Imprimez un message de confirmation
 	        System.out.println("Nouveau produit ajouté : " + newProduct.toString());
@@ -307,6 +328,10 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
 	        Product p = productRepository.findById(id)
 	                         .orElseThrow(() -> new NoSuchElementException("Aucun produit avec cet ID (" + id + ") trouvé."));
 	        productRepository.deleteById(id);
+	        
+	        // LOGS
+	        logger.trace("Produit avec ID " + id + " supprimé par l'utilisateur : " + actualUserId);
+
 	        System.out.println(p.toString() + " supprimé !");
 	    } catch (NoSuchElementException e) {
 	        System.out.println(e.getMessage());
@@ -348,6 +373,9 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
 
 	        // Sauvegarde du produit mis à jour
 	        productRepository.save(product);
+	        
+	        // LOGS
+	        logger.trace("Produit avec ID " + id + " mis à jour par l'utilisateur : " + actualUserId);
 
 	        // Affichage d'une confirmation
 	        System.out.println("Produit apres mis à jour : " + product.toString());

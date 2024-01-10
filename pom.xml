@@ -37,6 +37,13 @@ Profiling</description>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+		    <groupId>net.logstash.logback</groupId>
+		    <artifactId>logstash-logback-encoder</artifactId>
+		    <version>6.6</version> <!-- Utilisez la dernière version disponible -->
+		</dependency>
+
 	</dependencies>
 
 	<build>

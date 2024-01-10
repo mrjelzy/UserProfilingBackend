@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <appender name="JSON_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/user-trace.log</file>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/archived/user-trace.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Logger spécifique pour votre classe -->
+    <logger name="com.hai913i.UserProfilingBackendApplication" level="trace">
+        <appender-ref ref="JSON_FILE"/>
+    </logger>
+
+    <!-- Root logger -->
+    <root level="error">
+        <!-- Ne pas inclure JSON_FILE ici pour éviter la duplication des logs -->
+    </root>
+
+</configuration>
