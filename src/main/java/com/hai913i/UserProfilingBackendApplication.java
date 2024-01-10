@@ -159,7 +159,7 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
     	        if (p != null)
     	        {
     	        	// LOGS
-    	            logger.trace("L'utilisateur " + actualUserId + " a cherché le produit " + myId);
+    	            logger.trace(actualUserId + ":read:" + myId + ":Recherche de produit");
     	            
     	        	// Affichez les détails du produit si trouvé
     		        System.out.println("Détails du produit : " + p.toString());
@@ -262,7 +262,7 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
         userRepository.save(newUser);
         
         // LOGS
-        logger.trace("Nouvel utilisateur créé : " + newUser.getId());
+        // logger.trace("Nouvel utilisateur créé : " + newUser.getId());
 
         // Imprimez un message de confirmation.
         System.out.println("Nouvel utilisateur créé avec succès : " + newUser.toString());
@@ -275,7 +275,7 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
 	    {
 	    	actualUserId = user.get().getId();
 	    	// LOGS
-	    	logger.trace("User " + user.get().getId() + " connecté");
+	    	// logger.trace("User " + user.get().getId() + " connecté");
 	    	
 	        System.out.println("Connexion réussie pour : " + user.get().getName());
 	        return user.get().getName();
@@ -296,10 +296,10 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
 		try {
 	        LocalDate expireDate = LocalDate.parse(expire, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 
-	        // Vérifiez si un produit avec le même ID existe déjà
-	        Optional<Product> existingProduct = productRepository.findById(expireDate.toEpochDay()); // Exemple d'ID basé sur la date, à adapter selon votre logique d'ID
+	        // Vérifiez si un produit avec le même nom existe déjà
+	        Optional<Product> existingProduct = productRepository.findByNom(nom);
 	        if (existingProduct.isPresent()) {
-	            throw new Exception("Un produit avec cet ID existe déjà !");
+	            throw new Exception("Un produit avec ce nom existe déjà !");
 	        }
 
 	        // Créez une nouvelle instance de Product
@@ -309,7 +309,7 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
 	        productRepository.save(newProduct);
 	        
 	        // LOGS
-	        logger.trace("Nouveau produit ajouté par l'utilisateur : " + actualUserId);
+	        logger.trace(actualUserId + ":write:" + null + ":Nouveau produit ajouté par l'utilisateur");
 
 	        // Imprimez un message de confirmation
 	        System.out.println("Nouveau produit ajouté : " + newProduct.toString());
@@ -330,7 +330,7 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
 	        productRepository.deleteById(id);
 	        
 	        // LOGS
-	        logger.trace("Produit avec ID " + id + " supprimé par l'utilisateur : " + actualUserId);
+	        logger.trace(actualUserId + ":write:" + id + ":Produit supprimé par l'utilisateur");
 
 	        System.out.println(p.toString() + " supprimé !");
 	    } catch (NoSuchElementException e) {
@@ -375,7 +375,7 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
 	        productRepository.save(product);
 	        
 	        // LOGS
-	        logger.trace("Produit avec ID " + id + " mis à jour par l'utilisateur : " + actualUserId);
+	        logger.trace(actualUserId + ":write:" + id + ":Produit mis à jour par l'utilisateur");
 
 	        // Affichage d'une confirmation
 	        System.out.println("Produit apres mis à jour : " + product.toString());
