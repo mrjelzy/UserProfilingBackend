@@ -1,23 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-
-    <appender name="JSON_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <!-- Appender pour le fichier de log -->
+    <appender name="JSON_FILE" class="ch.qos.logback.core.FileAppender">
         <file>logs/user-trace.log</file>
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/archived/user-trace.%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>30</maxHistory>
-        </rollingPolicy>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
     </appender>
 
-    <!-- Logger spécifique pour votre classe -->
-    <logger name="com.hai913i.UserProfilingBackendApplication" level="trace">
+    <!-- Appender pour la console -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Logger spécifique pour les traces de com.hai913i -->
+    <logger name="com.hai913i.UserProfilingBackendApplication" level="TRACE" additivity="false">
         <appender-ref ref="JSON_FILE"/>
     </logger>
 
-    <!-- Root logger -->
-    <root level="error">
-        <!-- Ne pas inclure JSON_FILE ici pour éviter la duplication des logs -->
+    <!-- Configuration du logger racine pour les erreurs -->
+    <root level="ERROR">
+        <appender-ref ref="CONSOLE"/>
     </root>
-
 </configuration>
+
