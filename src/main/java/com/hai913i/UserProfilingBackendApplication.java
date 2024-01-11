@@ -3,10 +3,6 @@ package com.hai913i;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.Scanner;
 
 import org.slf4j.Logger;
@@ -21,6 +17,8 @@ import com.hai913i.models.Product;
 import com.hai913i.models.User;
 import com.hai913i.repositories.ProductRepository;
 import com.hai913i.repositories.UserRepository;
+import com.hai913i.services.ProductService;
+import com.hai913i.services.UserService;
 
 @SpringBootApplication
 public class UserProfilingBackendApplication implements CommandLineRunner{
@@ -30,6 +28,12 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
     
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private UserService userService;
+    
+    @Autowired
+    private ProductService productService;
     
     private Scanner scanner;
     
@@ -44,6 +48,8 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
     @Override
     public void run(String... args) throws Exception {
     	scanner = new Scanner(System.in);
+    	// userService = new UserService(userRepository);
+    	// productService = new ProductService(productRepository);
     	
     	clearJsonFile("logs/user-trace.json");
 
@@ -97,7 +103,7 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
                 System.out.print("Mot de passe : ");
                 String mdp = scanner.nextLine();
                 
-                nameActualUser = connectUser(email, mdp);
+                nameActualUser = userService.connectUser(email, mdp);
                 
                 System.out.println("");
                 System.out.println("============================");
@@ -120,13 +126,17 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
                     name = scanner.nextLine();
                     System.out.print("Mot de passe : ");
                     password = scanner.nextLine();
-                } while (!addUser(email, birthday, name, password));
+                } while (!userService.addUser(email, birthday, name, password));
                 
                 System.out.println("");
                 System.out.println("============================");
                 System.out.println("");
             }
         } while (!choice.equals("x"));
+        
+        System.out.println("");
+        System.out.println("============================");
+        System.out.println("");
         
         scanner.close();
     }
@@ -162,13 +172,10 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
         		System.out.print("Entrer l'Id : ");
     	        String myId = scanner.nextLine();
     	        
-    	        Product p = getProduct(Long.parseLong(myId));
+    	        Product p = productService.getProduct(Long.parseLong(myId));
     	        
     	        if (p != null)
     	        {
-    	        	// LOGS
-    	            logger.trace(actualUserId + ":read:" + myId + ":Recherche de produit");
-    	            
     	        	// Affichez les détails du produit si trouvé
     		        System.out.println("Détails du produit : " + p.toString());
     	        }
@@ -185,21 +192,21 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
     	        System.out.print("Date d'expiration (dd/MM/yyyy) : ");
     	        String expireDate = scanner.nextLine();
     	        
-    	        addProduct(name, prix, expireDate);
+    	        productService.addProduct(name, prix, expireDate);
         	}
         	if (choice_2.equals("4"))
         	{
         		System.out.print("ID du produit à supprimer : ");
     	        Long id = Long.parseLong(scanner.nextLine());
     	        
-    	        deleteProduct(id);
+    	        productService.deleteProduct(id);
         	}
         	if (choice_2.equals("5"))
         	{
         		System.out.print("ID du produit à modifier (laisser vide pour ne pas modifier) : ");
     	        Long id = Long.parseLong(scanner.nextLine());
     	        
-    	        Product p = getProduct(id);
+    	        Product p = productService.getProduct(id);
     	        
     	        if (p != null)
     	        {
@@ -232,7 +239,7 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
         	        }
         	        
         	        System.out.println("Produit avant mis à jour : " + p.toString());
-        	        updateProduct(id, name, prix, expireDate);
+        	        productService.updateProduct(id, name, prix, expireDate);
     	        }
     	        
         	}
@@ -241,157 +248,6 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
 	        System.out.println("============================");
 	        System.out.println("");
         } while (!choice_2.equals("x"));
-	}
-    
-    ////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////// USER /////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////
-
-	private Boolean addUser(String email, String birthday, String name, String password) {
-
-        Optional<User> existingUser = userRepository.findByEmail(email);
-        if (existingUser.isPresent()) {
-            System.out.println("Un compte avec cet email existe déjà !");
-            return false;
-        }
-
-        LocalDate birthDate;
-        try {
-            birthDate = LocalDate.parse(birthday, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        } catch (DateTimeParseException e) {
-            System.out.println("Le format de la date d'anniversaire est incorrect. Utilisez dd/MM/yyyy.");
-            return false;
-        }
-
-        // Créez une nouvelle instance de User avec les données fournies.
-        User newUser = new User(name, email, birthDate, password); // Assurez-vous que le constructeur de User est correctement défini.
-
-        // Sauvegardez le nouvel utilisateur dans la base de données.
-        userRepository.save(newUser);
-        
-        // LOGS
-        // logger.trace("Nouvel utilisateur créé : " + newUser.getId());
-
-        // Imprimez un message de confirmation.
-        System.out.println("Nouvel utilisateur créé avec succès : " + newUser.toString());
-        return true;
-    }
-
-	public String connectUser(String email, String password) {
-	    Optional<User> user = userRepository.findByEmailAndPassword(email, password);
-	    if(user.isPresent())
-	    {
-	    	actualUserId = user.get().getId();
-	    	// LOGS
-	    	// logger.trace("User " + user.get().getId() + " connecté");
-	    	
-	        System.out.println("Connexion réussie pour : " + user.get().getName());
-	        return user.get().getName();
-	    } else {
-	        // L'utilisateur n'existe pas ou le mot de passe est incorrect
-	        System.out.println("Identifiants incorrects !");
-	    }
-	    
-	    return null;
-	}
-
-    ////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////// PRODUCTS ///////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////
-	
-	private Boolean addProduct(String nom, Double prix, String expire)
-	{
-		try {
-	        LocalDate expireDate = LocalDate.parse(expire, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-
-	        // Vérifiez si un produit avec le même nom existe déjà
-	        Optional<Product> existingProduct = productRepository.findByNom(nom);
-	        if (existingProduct.isPresent()) {
-	            throw new Exception("Un produit avec ce nom existe déjà !");
-	        }
-
-	        // Créez une nouvelle instance de Product
-	        Product newProduct = new Product(nom, prix, expireDate);
-
-	        // Sauvegardez le nouveau produit dans la base de données
-	        productRepository.save(newProduct);
-	        
-	        // LOGS
-	        logger.trace(actualUserId + ":write:" + "" + ":Nouveau produit ajouté par l'utilisateur");
-
-	        // Imprimez un message de confirmation
-	        System.out.println("Nouveau produit ajouté : " + newProduct.toString());
-	        return true;
-	    } catch (DateTimeParseException e) {
-	        System.out.println("Le format de la date d'expiration est incorrect. Utilisez dd/MM/yyyy.");
-	    } catch (Exception e) {
-	        System.out.println(e.getMessage());
-	    }
-		
-		return false;
-    }
-	
-	private void deleteProduct(Long id) {
-	    try {
-	        Product p = productRepository.findById(id)
-	                         .orElseThrow(() -> new NoSuchElementException("Aucun produit avec cet ID (" + id + ") trouvé."));
-	        productRepository.deleteById(id);
-	        
-	        // LOGS
-	        logger.trace(actualUserId + ":write:" + id + ":Produit supprimé par l'utilisateur");
-
-	        System.out.println(p.toString() + " supprimé !");
-	    } catch (NoSuchElementException e) {
-	        System.out.println(e.getMessage());
-	    }
-	}
-	
-	private Product getProduct(Long id) {
-		Product product = null;
-	    try {
-	        product = productRepository.findById(id)
-	                          .orElseThrow(() -> new NoSuchElementException("Aucun produit avec cet ID (" + id + ") trouvé."));
-	        
-	    } catch (NoSuchElementException e) {
-	        // Gérez le cas où aucun produit avec l'ID donné n'est trouvé
-	        System.out.println(e.getMessage());
-	    }
-	    
-	    return product;
-	}
-	
-	private void updateProduct(Long id, String nom, Double prix, String expire)
-	{
-		try {
-	        // Recherche du produit par son ID
-	        Product product = productRepository.findById(id)
-	                          .orElseThrow(() -> new NoSuchElementException("Aucun produit avec cet ID (" + id + ") trouvé."));
-
-	        // Mise à jour des informations du produit
-	        if (nom != null && !nom.isEmpty()) {
-	            product.setNom(nom);
-	        }
-	        if (prix != null) {
-	            product.setPrix(prix);
-	        }
-	        if (expire != null && !expire.isEmpty()) {
-	            LocalDate expireDate = LocalDate.parse(expire, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-	            product.setDateExpiration(expireDate);
-	        }
-
-	        // Sauvegarde du produit mis à jour
-	        productRepository.save(product);
-	        
-	        // LOGS
-	        logger.trace(actualUserId + ":write:" + id + ":Produit mis à jour par l'utilisateur");
-
-	        // Affichage d'une confirmation
-	        System.out.println("Produit apres mis à jour : " + product.toString());
-	    } catch (DateTimeParseException e) {
-	        System.out.println("Le format de la date d'expiration est incorrect. Utilisez dd/MM/yyyy.");
-	    } catch (NoSuchElementException e) {
-	        System.out.println(e.getMessage());
-	    }
 	}
 	
 	public static void clearJsonFile(String filePath) {
