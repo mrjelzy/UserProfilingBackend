@@ -45,10 +45,10 @@ public class ProductService
 	        Product newProduct = new Product(nom, prix, expireDate);
 
 	        // Sauvegardez le nouveau produit dans la base de données
-	        productRepository.save(newProduct);
+	        Long generatedId = productRepository.save(newProduct).getId();
 	        
 	        // LOGS
-	        logger.trace(globalData.getActualUserId() + ":write:" + "" + ":Nouveau produit ajouté par l'utilisateur");
+	        logger.trace(globalData.getActualUserId() + ":write:" + generatedId + ":Nouveau produit ajoute");
 
 	        // Imprimez un message de confirmation
 	        System.out.println("Nouveau produit ajouté : " + newProduct.toString());
@@ -69,7 +69,7 @@ public class ProductService
 	        productRepository.deleteById(id);
 	        
 	        // LOGS
-	        logger.trace(globalData.getActualUserId() + ":write:" + id + ":Produit supprimé par l'utilisateur");
+	        logger.trace(globalData.getActualUserId() + ":write:" + id + ":Produit supprime");
 
 	        System.out.println(p.toString() + " supprimé !");
 	    } catch (NoSuchElementException e) {
@@ -117,7 +117,7 @@ public class ProductService
 	        productRepository.save(product);
 	        
 	        // LOGS
-	        logger.trace(globalData.getActualUserId() + ":write:" + id + ":Produit mis à jour par l'utilisateur");
+	        logger.trace(globalData.getActualUserId() + ":write:" + id + ":Produit mis a jour");
 
 	        // Affichage d'une confirmation
 	        System.out.println("Produit apres mis à jour : " + product.toString());

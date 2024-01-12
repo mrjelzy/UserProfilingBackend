@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Scanner;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -35,11 +33,10 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
     @Autowired
     private ProductService productService;
     
+    @Autowired
+    private GlobalData globalData;
+    
     private Scanner scanner;
-    
-    Logger logger = LoggerFactory.getLogger(UserProfilingBackendApplication.class);
-    
-    Long actualUserId = null;
 
     public static void main(String[] args) {
         SpringApplication.run(UserProfilingBackendApplication.class, args);
@@ -48,8 +45,6 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
     @Override
     public void run(String... args) throws Exception {
     	scanner = new Scanner(System.in);
-    	// userService = new UserService(userRepository);
-    	// productService = new ProductService(productRepository);
     	
     	clearJsonFile("logs/user-trace.json");
 
@@ -57,7 +52,10 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
         initData();
 
         // Logique CLI
-        startCli();
+        // startCli();
+        
+        // Logique Simulation
+        startSimulation();
         
         UserProfileBuilder.profileBuilder();
         
@@ -257,5 +255,29 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
             e.printStackTrace();
         }
     }
+	
+	public void startSimulation()
+	{
+		userService.addUser("john.doe@email.com", "10/12/2000", "John", "mdp");
+		userService.connectUser("john.doe@email.com", "mdp");
+		
+		productService.addProduct("Cafe", 3.0, "12/12/2024");
+		productService.addProduct("Riz", 5.0, "12/12/2024");
+		
+		productService.getProduct(productRepository.findAll().stream().findFirst().orElse(null).getId());
+		
+		System.out.println("");
+        System.out.println("============================");
+        System.out.println("");
+		
+		try
+		{
+			Thread.sleep(1000);
+		} catch (InterruptedException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 }

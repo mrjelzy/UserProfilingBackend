@@ -48,7 +48,7 @@ public class UserProfileBuilder
         	
         	for (Map.Entry<String, EntryLog> log : entry.getValue().getActions().entrySet())
         	{
-        		System.out.println("- " + log.toString());
+        		System.out.println("- " + log.getKey() + " -> " + log.getValue().toString());
         	}       	
         }
     }
