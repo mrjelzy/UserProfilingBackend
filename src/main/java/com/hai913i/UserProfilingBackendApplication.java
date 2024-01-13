@@ -3,6 +3,8 @@ package com.hai913i;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,9 +35,6 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
     @Autowired
     private ProductService productService;
     
-    @Autowired
-    private GlobalData globalData;
-    
     private Scanner scanner;
 
     public static void main(String[] args) {
@@ -51,11 +50,19 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
         // Initialisation des données
         initData();
 
-        // Logique CLI
-        // startCli();
+        System.out.println("[1] - Manipuler manuellement");
+        System.out.println("[2] - Lancer les scenarios");
+
+        if (scanner.nextLine().equals("1"))
+        {
+        	startCli();
+        }
+        else
+        {
+        	startSimulation();
+        }
         
-        // Logique Simulation
-        startSimulation();
+        System.out.println("");
         
         UserProfileBuilder.profileBuilder();
         
@@ -66,15 +73,21 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
     	System.out.println("");
     	
         // Créez une nouvelle instance de Product
-        Product newProduct = new Product("Chocolat", 3.50, LocalDate.of(2023, 12, 31));
-        User newUser = new User("Pepe", "cacamail", LocalDate.of(2000, 12, 31), "caca");
+        List<Product> products = Arrays.asList(
+            new Product("Chocolat", 3.50, LocalDate.of(2023, 12, 31)),
+            new Product("Bonbons", 2.00, LocalDate.of(2023, 10, 15)),
+            new Product("Biscuits", 4.25, LocalDate.of(2023, 11, 20)),
+            new Product("Gâteau", 5.75, LocalDate.of(2023, 9, 10))
+        );
+        
+        User newUser = new User("Pepe", "pepe@mail.com", LocalDate.of(2000, 12, 31), "pepe");
         
         // Sauvegardez le Product et l'User dans la base de données H2
         userRepository.save(newUser);
-        productRepository.save(newProduct);
+        productRepository.saveAll(products);
 
         // Pour vérifier, imprimez le Product et l'User sauvegardé dans la console
-        System.out.println("Produit sauvegardé : " + newProduct.toString());
+        System.out.println("Produit sauvegardé : " + products.toString());
         System.out.println("User sauvegardé : " + newUser.toString());
         
         System.out.println("");
@@ -258,13 +271,11 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
 	
 	public void startSimulation()
 	{
-		userService.addUser("john.doe@email.com", "10/12/2000", "John", "mdp");
-		userService.connectUser("john.doe@email.com", "mdp");
-		
-		productService.addProduct("Cafe", 3.0, "12/12/2024");
-		productService.addProduct("Riz", 5.0, "12/12/2024");
-		
-		productService.getProduct(productRepository.findAll().stream().findFirst().orElse(null).getId());
+		scenario_1();
+		scenario_2();
+		scenario_3();
+		scenario_4();
+		scenario_5();
 		
 		System.out.println("");
         System.out.println("============================");
@@ -275,9 +286,64 @@ public class UserProfilingBackendApplication implements CommandLineRunner{
 			Thread.sleep(1000);
 		} catch (InterruptedException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
+	private void scenario_1()
+	{
+		userService.addUser("john.doe@email.com", "10/12/2000", "John", "mdp");
+		userService.connectUser("john.doe@email.com", "mdp");
+		
+		productService.addProduct("Cafe", 3.0, "12/12/2024");
+		productService.addProduct("Riz", 5.0, "12/12/2024");
+		
+		productService.getProduct(productRepository.findAll().stream().findFirst().orElse(null).getId());
+	}
+	
+	private void scenario_2()
+	{
+		userService.addUser("anne.doe@email.com", "10/12/2000", "Anne", "mdp");
+		userService.connectUser("anne.doe@email.com", "mdp");
+		
+		productService.getProduct(productRepository.findAll().stream().findFirst().orElse(null).getId());
+		
+		productService.addProduct("Soupe", 2.0, "12/02/2024");
+		
+		productService.getProduct(productRepository.findAll().stream().findFirst().orElse(null).getId());
+	}
+	
+	private void scenario_3()
+	{
+		userService.addUser("clow.doe@email.com", "09/08/1996", "Clow", "mdp");
+		userService.connectUser("clow.doe@email.com", "mdp");
+		
+		productService.getProduct(productRepository.findAll().stream().findFirst().orElse(null).getId());
+		productService.getProduct(productRepository.findAll().stream().findFirst().orElse(null).getId());
+		productService.getProduct(productRepository.findAll().stream().findFirst().orElse(null).getId());
+	}
+
+	private void scenario_4()
+	{
+	    userService.addUser("lucie.bernard@email.com", "05/04/1997", "Lucie", "mdp789");
+	    userService.connectUser("lucie.bernard@email.com", "mdp789");
+
+	    productService.addProduct("Chocolat", 4.0, "20/12/2024");
+	    productService.addProduct("Lait", 2.0, "01/01/2025");
+
+		productService.getProduct(productRepository.findAll().stream().findFirst().orElse(null).getId());
+	}
+
+	private void scenario_5()
+	{
+	    userService.addUser("simon.petit@email.com", "11/11/1999", "Simon", "motdepasse");
+	    userService.connectUser("simon.petit@email.com", "motdepasse");
+
+	    productService.addProduct("Vin", 12.0, "31/12/2024");
+	    productService.addProduct("Fromage", 5.0, "15/02/2025");
+
+		productService.getProduct(productRepository.findAll().stream().findFirst().orElse(null).getId());
+	    productService.updateProduct(productRepository.findByNom("Fromage").orElse(null).getId(), "Fromage", 6.0, "15/02/2025");
+	    productService.deleteProduct(productRepository.findByNom("Vin").orElse(null).getId());
+	}
 }

@@ -17,6 +17,9 @@ public class UserProfileBuilder
         ObjectMapper mapper = new ObjectMapper();
         String logFilePath = "logs/user-trace.json";
         Map<String, UserProfile> userProfiles = new HashMap<>();
+        
+        UserProfile topRead = new UserProfile();
+        UserProfile topWrite = new UserProfile();
 
         try (BufferedReader br = new BufferedReader(new FileReader(logFilePath)))
         {
@@ -42,6 +45,7 @@ public class UserProfileBuilder
             }
         }
 
+        // Print les UserProfiles
         for (Map.Entry<String, UserProfile> entry : userProfiles.entrySet())
         {
         	System.out.println("ID utilisateur : " + entry.getKey());
@@ -49,8 +53,23 @@ public class UserProfileBuilder
         	for (Map.Entry<String, EntryLog> log : entry.getValue().getActions().entrySet())
         	{
         		System.out.println("- " + log.getKey() + " -> " + log.getValue().toString());
-        	}       	
+        	}
+        	
+        	if(entry.getValue().getNbRead() > topRead.getNbRead())
+        	{
+        		topRead = entry.getValue();
+        	}
+        	
+        	if(entry.getValue().getNbWrite() > topRead.getNbWrite())
+        	{
+        		topWrite = entry.getValue();
+        	}
+        	
+        	System.out.println("");
         }
+        
+        System.out.println("User ID avec le plus de lectures (" + topRead.getNbRead() + ") = " + topRead.getUserId());
+        System.out.println("User ID avec le plus d'écritures (" + topWrite.getNbWrite() + ") = " + topWrite.getUserId());
     }
 
     private static String extractProductId(String message)

@@ -7,15 +7,34 @@ public class UserProfile
 {
 	private String userId;
     private Map<String, EntryLog> actions; // Clé : Timestamp, Valeur : Log
+    private int nbRead;
+    private int nbWrite;
+    
+    public UserProfile()
+    {
+    	this.nbRead = 0;
+        this.nbWrite = 0;
+    }
 
     public UserProfile(String userId) {
         this.userId = userId;
         this.actions = new HashMap<>();
+        this.nbRead = 0;
+        this.nbWrite = 0;
     }
 
     public void updateProfileWithLogEntry(String timestamp, String type, String productID)
     {
     	actions.put(timestamp, new EntryLog(userId, type, productID));
+    	
+    	if(type.equals("read"))
+    	{
+    		nbRead += 1;
+    	}
+    	else if (type.equals("write"))
+    	{
+    		nbWrite += 1;
+    	}
     }
     
     public String toString()
@@ -53,6 +72,25 @@ public class UserProfile
 	{
 		this.actions = actions;
 	}
-	
+
+	public int getNbRead()
+	{
+		return nbRead;
+	}
+
+	public void setNbRead(int nbRead)
+	{
+		this.nbRead = nbRead;
+	}
+
+	public int getNbWrite()
+	{
+		return nbWrite;
+	}
+
+	public void setNbWrite(int nbWrite)
+	{
+		this.nbWrite = nbWrite;
+	}
 	
 }
